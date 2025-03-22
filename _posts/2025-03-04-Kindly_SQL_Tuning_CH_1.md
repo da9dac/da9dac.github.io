@@ -1,5 +1,5 @@
 ---
-title: "[친절한 SQL 튜닝] SQL 처리 과정과 I/O"
+title: "SQL 처리 과정과 I/O"
 date: 2025-03-04 19:51:00 +/-TTTT
 categories: [Book, 친절한 SQL 튜닝]
 tags: [SQL, DB, Oracle]

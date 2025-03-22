@@ -1,5 +1,5 @@
 ---
-title: "[친절한 SQL 튜닝] 인덱스 튜닝"
+title: "인덱스 튜닝"
 date: 2025-03-14 19:44:00 +/-TTTT
 categories: [Book, 친절한 SQL 튜닝]
 tags: [SQL, DB, Oracle]
