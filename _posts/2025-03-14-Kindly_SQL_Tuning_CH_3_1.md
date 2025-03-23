@@ -1,5 +1,5 @@
 ---
-title: "인덱스 튜닝"
+title: "인덱스 튜닝 - 테이블 액세스 최소화와 부분범위 처리 활용"
 date: 2025-03-14 19:44:00 +/-TTTT
 categories: [Book, 친절한 SQL 튜닝]
 tags: [SQL, DB, Oracle]
@@ -15,8 +15,6 @@ SQL 튜닝은 랜덤 I/O를 줄이는 것이라고 1장과 2장에서도 언급�
   
 순차 I/O : 연속된 블록을 순차적으로 탐색해 디스크의 헤드 이동이 최소화 되어 빠름  
 랜덤 I/O : 여러 위치에 흩어진 블록을 탐색해 디스크의 헤드 이동 시간이 길어져 느림  
-  
-<!-- ![Image](https://github.com/user-attachments/assets/069bb4c7-566b-4af9-bbea-4abd2a814e11){: .align-right}{: width="80%" height="80%"}   -->
   
 ## 테이블 랜덤 액세스
 인덱스는 대량의 데이터에서 소량의 데이터를 찾을 때 효율적이지  
