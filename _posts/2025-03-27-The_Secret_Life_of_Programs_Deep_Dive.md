@@ -58,8 +58,70 @@ toc: true
 정수의 각 비트를 상태를 나타내는 플래그로 사용하는 기법으로, 여러 상태를 하나의 변수로 관리할 수 있다.  
   
 #### 사용자 권한 관리
-- 0001 : 읽기
-- 0010 : 쓰기
-- 0100 : 실행
-- 1000 : 관리
+사용자 권한이 다음과 같이 있을 때때
+- 0001(1) : 읽기
+- 0010(2) : 쓰기
+- 0100(4) : 실행
+- 1000(8) : 관리
+  
+권한 설정
+```python
+permissions = 0
 
+permissions |= 1
+permissions |= 2
+
+print(bin(permissions))  # 출력: 0b11 (읽기 + 쓰기)
+``` 
+  
+권한 확인
+```python
+if permissions & 2:  
+    print("쓰기 권한 있음")
+else:
+    print("쓰기 권한 없음")
+```
+  
+권한 제거 (and not)
+```python
+permissions &= ~2  
+
+print(bin(permissions))  # 출력: 0b1 (읽기)
+```
+  
+여러 권한 확인
+```python
+permissions = 1 | 2 | 4  
+
+print(bin(permissions))  # 출력: 0b111 (읽기 + 쓰기 + 실행)
+```
+  
+플래그 설정 = 왼쪽 시프트 연산
+```python
+# 읽기 권한 플래그 설정 (1번째 비트)
+READ_PERMISSION = 1 << 0  # 1
+
+# 쓰기 권한 플래그 설정 (2번째 비트)
+WRITE_PERMISSION = 1 << 1  # 2
+
+# 실행 권한 플래그 설정 (3번째 비트)
+EXECUTE_PERMISSION = 1 << 2  # 4
+```
+  
+플래그 확인 = 오른쪽 시프트 연산
+```python
+permissions = READ_PERMISSION | WRITE_PERMISSION  # 3 (0b11)
+
+if (permissions >> 1) & 1:
+    print("쓰기 권한 있음")
+else:
+    print("쓰기 권한 없음")
+
+```
+  
+플래그 해제
+```python
+permissions &= ~(1 << 1)  # 1 (0b1)
+
+print(bin(permissions))  # 0b1 (읽기 권한만 남음)
+```
