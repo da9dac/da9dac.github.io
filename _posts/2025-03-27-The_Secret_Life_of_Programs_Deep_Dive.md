@@ -126,6 +126,8 @@ permissions &= ~(1 << 1)  # 1 (0b1)
 print(bin(permissions))  # 0b1 (읽기 권한만 남음)
 ```
   
+[관련 SQL 문제](https://school.programmers.co.kr/learn/courses/30/lessons/301647)
+
 ### GPU와 비트코인
 비트 코인을 채굴할 때는 블록체인 네트워크에서 해시 함수를 반복적으로 계산해 블록을 유효화 하는 작업이 필요하고, 해당 과정에서 많은 수의 단순한 연산이 필요하다.  
   
