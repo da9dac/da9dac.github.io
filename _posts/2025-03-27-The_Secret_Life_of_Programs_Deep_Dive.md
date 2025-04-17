@@ -430,10 +430,25 @@ public class LinkedListIteratorExample {
 왼쪽 자식의 오른쪽 서브트리가 높은 경우로 좌회전을 수행해 LL 유형으로 변환 후 LL 불균형 해결 방식으로 처리한다.  
   
 **Right-Left**  
-오른쪽 자식의 왼쪽 서브트리가 높은 경우로 LR 방식의 반대로 처리하면 된다.
+오른쪽 자식의 왼쪽 서브트리가 높은 경우로 LR 방식의 반대로 처리하면 된다.  
+  
+### 자바의 정렬 알고리즘  
+```java
+// Dual-Pivot QuickSort
+Array.sort(기본타입 배열)
 
-B트리  
-인덱스  
-언어별 정렬 알고리즘  
-해시 충돌 해결법과 방지  
-해시 체인의 문제점  
+// TimSort
+Array.sort(객체 배열)
+
+// Arrays.sort(객체 배열) = TimSort
+Collections.sort(List)
+```
+**Dual-Pivot QuickSort**  
+- 퀵 정렬의 변형
+- 두 개의 피벗을 사용해 분할 효율을 높임
+- 평균 O(n log n), 최악 O(n²)
+  
+**TimSort**  
+- 병합 정렬과 삽입 정렬을 결합한 알고리즘
+- 이미 정렬되어 있거나 부분적으로 정렬된 데이터에 매우 효율적
+- 평균 O(n log n), 최악 O(n²)
