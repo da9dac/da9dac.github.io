@@ -553,4 +553,142 @@ Latency가 발생하는 두 가지 원인을 확인했으니 어떻게 해결할
   
 코드를 모두 실행해서 모든 클래스를 적재하고 메서드들도 예열시키기는 무리가 있기 때문에 자주 사용될 것으로 예상되는 부분들을 위주로 Warm Up을 진행해주면 된다.  
   
-각 컴파일러의 컴파일 임계치(Compile Threshold)는 C1은 1,500회, C2는 10,000회이다.
+각 컴파일러의 컴파일 임계치(Compile Threshold)는 C1은 1,500회, C2는 10,000회이다.  
+  
+## 8주차
+### 각 언어에서 버퍼를 사용하는 방법
+#### JAVA
+```java
+public class BufferedIOExample {
+  public static void main(String[] args) {
+    try {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.print("문자열을 입력하세요: ");
+        String input = br.readLine();
+        
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        bw.write("입력한 문자열: " + input);
+        bw.newLine(); // 줄바꿈
+        bw.flush(); // 버퍼 비우기 == 출력
+        
+        br.close(); 
+        bw.close();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+  }
+}
+```
+**BufferedReader**  
+- Enter를 경계로 입력값을 인식한다.
+- Scanner는 Space도 인식한다.
+- 항상 String으로 반환한다.
+  
+**BufferedWriter**  
+- 버퍼에 데이터를 모아두었다가 한 번에 출력한다.
+- 버퍼가 가득차면 자동으로 출력한다.
+- 버퍼가 가득차지 않아도 flush를 호출하면 강제로 출력할 수 있다.
+- close에서도 내부적으로 flush를 호출한다.
+  
+#### Python
+```python
+line = sys.stdin.readline()
+sys.stdout.write(line)
+sys.stdout.flush()
+```
+- 자바의 BufferedReader/BufferedWriter와 비슷하게 사용할 수 있다.  
+- 입력값도 똑같이 문자열로 받는다.
+- sys.stdin.buffer/sys.stdout.buffer를 사용하면 입출력을 바이트로 처리한다.  
+  
+#### C/C++
+```c
+#include <stdio.h>
+
+int main() {
+    char buffer[1024];
+
+    printf("문자열을 입력하세요: ");
+    fflush(stdout);
+
+    if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+        fputs("입력한 문자열: ", stdout);
+        fputs(buffer, stdout);
+    }
+
+    return 0;
+}
+
+```
+- `fgets()`로 `stdin`에서 라인 단위로 입력을 처리한다.
+- `fputs()`로 `stdout`으로 버퍼링된 출력을 한다.
+- `fflush()`로 즉시 버퍼에서 출력한다.
+- `scanf()`와 `printf()`가 성능적으로 더 빠르다고 함
+- C++에도 함수가 동일하게 존재하고 문법만 다르다.
+  
+### 표준 입출력을 동일하게 처리할 수 있다는게 무슨 말일까?
+```c
+// 콘솔에서 입력 받기
+void readFromConsole() {
+    char buffer[100];
+    printf("콘솔에 입력하세요: ");
+    scanf("%s", buffer);
+    printf("입력한 내용: %s\n", buffer);
+}
+
+// 파일에서 읽기
+void readFromFile() {
+    FILE *file = fopen("data.txt", "r");
+    if (file != NULL) {
+        char buffer[100];
+        fscanf(file, "%s", buffer);
+        printf("파일 내용: %s\n", buffer);
+        fclose(file);
+    }
+}
+
+// 파일에 쓰기
+void writeToFile(char *data) {
+    FILE *file = fopen("data.txt", "w");
+    if (file != NULL) {
+        fprintf(file, "%s", data);
+        fclose(file);
+    }
+}
+```
+C의 경우에는 위와 같이 `scanf()`와 `fscanf()`, `printf()`와 `fprintf()`처럼 콘솔과 파일 모두 유사한 함수를 사용해 일관된 방식으로 처리할 수 있다.
+```javascript
+// 콘솔(브라우저 프롬프트)에서 입력 받기
+function readFromConsole() {
+    const input = prompt("콘솔에 입력하세요:");
+    console.log("입력한 내용:", input);
+    return input;
+}
+
+// 로컬 스토리지에 데이터 저장 (파일 시스템 직접 접근 불가)
+function saveData(data) {
+    localStorage.setItem("savedData", data);
+    console.log("데이터가 저장되었습니다.");
+}
+
+// 로컬 스토리지에서 데이터 읽기
+function loadData() {
+    const data = localStorage.getItem("savedData");
+    console.log("저장된 데이터:", data);
+    return data;
+}
+
+// 파일 시스템 접근
+function nodeJsFileExample() {
+    const fs = require('fs');
+    
+    // 파일에 쓰기
+    fs.writeFileSync('data.txt', '안녕하세요', 'utf8');
+    
+    // 파일에서 읽기
+    const data = fs.readFileSync('data.txt', 'utf8');
+    console.log("파일 내용:", data);
+}
+```
+반면에 자바스크립트의 경우에는 브라우저에서는 파일 시스템에 직접 접근할 수 없어서 로컬 스토리지 등을 사용해야해서 완전히 다른 API를 사용하고, Node.js 같은 경우에는 파일 시스템에 접근이 가능하지만 이 때도 브라우저 API와 다른 API를 사용한다.  
+  
+즉, C는 다양한 입출력 장치를 모두 파일로 취급해(장치의 추상화) `fxxxx()` 함수를 사용해 다양한 장치와 상호작용을 할 수 있지만, 자바스크립트는 각 기능별로 별도의 인터페이스를 제공해 동일하게 처리할 수가 없다.  
