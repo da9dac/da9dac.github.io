@@ -729,4 +729,49 @@ int main() {
     return 0;
 }
 ```
-그래서 C에서는 위와 같이 키보드나 파일이나 같은 파일이기 때문에 동일하게 처리가 가능하게 만들어진 것이다.
+그래서 C에서는 위와 같이 키보드나 파일이나 같은 파일이기 때문에 동일하게 처리가 가능하게 만들어진 것이다.  
+  
+## 9주차
+### 자바스크립트는 데이터베이스와의 통신에서 스레드 환경 차이를 어떻게 극복할까?
+#### 구조적 차이
+자바스크립트는 싱글 스레드 기반의 이벤트 루프 구조로 물리적으로 비동기를 지원하는 것이 아닌 비동기 함수를 통해 논리적으로 동시성을 구현한다. 반면에 데이터베이스는 멀티 스레드로 여러 트랜잭션을 동시에 처리할 수 있다.  
+  
+이러한 구조적 차이로 인해 동시에 여러 비동기 요청이 DB에 발생하면 경쟁 상태나 트랜잭션 불일치 문제가 발생할 수 있다.  
+  
+#### 비동기 함수와 트랜잭션
+`Promise.all()` 함수는 여러 비동기 작업을 동시에 실행하고, 모두 성공해야 성공이다. 트랜잭션도 마찬가지로 하나라도 실패하면 롤백, 모두 성공해야 커밋을 진행한다.  
+  
+둘은 비슷한 점이 있지만 연결에 대한 부분이 많이 다르다. 트랜잭션은 같은 커넥션에서 실행되지만, `Promise.all()` 함수의 경우에는 병렬로 실행되어 동시에 여러 요청이 서로 다른 커넥션에서 실행될 수 있어서 트랜잭션 범위 밖에서 작업이 실행되는 문제가 발생할 수 있다.  
+  
+#### 발생할 수 있는 문제
+- 동시에 같은 데이터를 수정할 때 실행 순서에 따라 데이터가 예상과는 다르게 변경될 수 있다. (Race Condition)
+- 일부 작업만 반영되는 트랜잭션 불일치가 발생할 수 있다.
+  
+#### ORM 기술에서는 트랜잭션을 어떻게 관리할까?
+```typescript
+const queryRunner = connection.createQueryRunner();
+await queryRunner.connect();
+await queryRunner.startTransaction();
+try {
+  await queryRunner.manager.save(...);
+  await queryRunner.commitTransaction();
+} catch (e) {
+  await queryRunner.rollbackTransaction();
+} finally {
+  await queryRunner.release();
+}
+```
+TypeORM의 경우 반드시 동일한 쿼리 러너(커넥션)에서 모든 쿼리를 실행해야 트랜잭션이 동작한다.  
+```javascript
+await prisma.$transaction(async (tx) => {
+  await tx.model.create(...);
+  await tx.model.update(...);
+});
+```
+Prisma, Sequelize 같은 경우는 트랜잭션을 전달 받아 쿼리를 실행한다.  
+  
+#### Race Condition 방지 전략
+- 순차 실행 : 반드시 await으로 순차적으로 실행하거나, 같은 커넥션에서 모든 쿼리를 실행해서 트랜잭션을 하나로 관리한다.
+- 락 사용 : DB에서 비관적 락 혹은 낙관적 락을 활용한다.
+- 트랜잭션 격리 수준 조정 : 격리 레벨을 높여 동시성 이슈를 줄인다.
+- 중복 요청 취소 : 프론트 레벨에서 중복 요청을 막는다.
