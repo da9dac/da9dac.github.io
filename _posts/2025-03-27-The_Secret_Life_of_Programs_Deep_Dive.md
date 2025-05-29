@@ -776,4 +776,65 @@ Prisma, Sequelize 같은 경우는 트랜잭션을 전달 받아 쿼리를 실�
 - 트랜잭션 격리 수준 조정 : 격리 레벨을 높여 동시성 이슈를 줄인다.
 - 중복 요청 취소 : 프론트 레벨에서 중복 요청을 막는다.
   
-### 커넥션 풀은 왜 작을 수록 좋을까?
+## 10주차
+### 스프링에서 평문을 암호화 하는 방식
+#### BCryptPasswordEncoder
+```java
+BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
+String encodedPassword = encoder.encode("myPassword");
+boolean isMatch = encoder.matches("myPassword", encodedPassword);
+```
+- 단방향 해시 함수로 주로 비밀번호를 저장 및 검증 할 때 사용한다.
+- 내부적으로 salt를 자동 생성하고, 생성자 파라미터는 해싱의 강도를 설정한다.
+    
+#### Pbkdf2PasswordEncoder
+```java
+Pbkdf2PasswordEncoder encoder = Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+String encodedPassword = encoder.encode("myPassword");
+```
+- salt와 반복 횟수를 사용해 반복적으로 해싱한다.
+- 의도적으로 속도가 느리게 만들어진 방식이라 무차별 대입 공격에 강하다.
+  
+#### Encryptors.stronger / Encryptors.standard
+```java
+BytesEncryptor stronger = Encryptors.stronger("myPassword", "salt");
+BytesEncryptor standard = Encryptors.standard("myPassword", "salt");
+```
+- 대칭키 암호화 방식이다.
+- 각각 AES-256, AES-128 방식을 사용한다.
+- 비밀번호와 salt를 이용해 키를 생성하고, 데이터를 암호화/복호화 한다.
+- 키가 유출되면 복호화가 가능해 키 관리가 중요하다.
+- 비밀번호는 복호화가 불가능해야 안전하기 때문에 파일이나 설정 값 같은 데이터를 보호할 때 적합하다.
+  
+#### Custom
+```java
+PasswordEncoder encoder = new PasswordEncoder() {
+    String salt = KeyGenerators.string().generateKey();
+
+    PasswordEncoder encoder = new PasswordEncoder() {
+        @Override
+        public String encode(CharSequence rawPassword) {
+            return salt + ":" + rawPassword.toString();
+        }
+
+        @Override
+        public boolean matches(CharSequence rawPassword, String encodedPassword) {
+            String[] parts = encodedPassword.split(":", 2);
+            if (parts.length != 2) return false;
+            String storedSalt = parts[0];
+            String encoded = storedSalt + ":" + rawPassword.toString();
+            return encoded.equals(encodedPassword);
+        }
+    };
+
+    String rawPassword = "myPassword";
+    String encodedPassword = encoder.encode(rawPassword);
+
+    System.out.println("원본 비밀번호: " + rawPassword);
+    System.out.println("암호화된 비밀번호: " + encodedPassword);
+
+    boolean isMatch = encoder.matches(rawPassword, encodedPassword);
+    System.out.println("비밀번호 일치 여부: " + isMatch);
+};
+```
+- 직접 PasswordEncoder를 구현할 수도 있지만, 이미 검증된 방식들을 사용하는게 좋다.
